@@ -1,14 +1,20 @@
-import diff from "fast-diff";
-import type { Diff } from "fast-diff";
 import DiffContext from "./model/DiffContext";
-import InputSource from "./model/InputSource";
-import type Mark from "./model/Mark";
+import type { IRangeReader } from "./model/Range";
+import { DiffConfig } from "./model/DiffConfig";
 
-const createMarks = (prev: string, next: string): [Mark, Mark] => {
-  const src = new InputSource(prev);
-  const dst = new InputSource(next);
-  const changes: Diff[] = diff(prev, next);
-  const ctx = new DiffContext(src, dst, changes);
-  return ctx.buildMarks();
+const createContext = (config: DiffConfig) => new DiffContext(config);
+
+const createMarks = (
+  prev: string,
+  next: string,
+  delim?: string
+): [IRangeReader, IRangeReader] => {
+  const config: DiffConfig = {
+    lineDelimeter: delim || "\n",
+  };
+  const ctx = createContext(config);
+  const [src, dst] = ctx.build(prev, next);
+  return [src, dst];
 };
+
 export default { createMarks };

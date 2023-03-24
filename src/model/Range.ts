@@ -1,3 +1,14 @@
+export interface IRangeWriter {
+  offset: number;
+  proceed(step: number): IRangeWriter;
+  addRange(text: string): IRangeWriter;
+}
+export interface IRangeReader {
+  text: string;
+  ranges: IRange[];
+  textAt(range: IRange): string;
+  getWordRanges(delim?: string): IRange[];
+}
 export interface IRange {
   offset: number;
   /**
