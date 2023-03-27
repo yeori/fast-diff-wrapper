@@ -1,20 +1,29 @@
-import DiffContext from "./model/DiffContext";
-import type { IRangeReader } from "./model/Range";
 import { DiffConfig } from "./model/DiffConfig";
+import util from "./util";
+import diff from "fast-diff";
+import type { Diff } from "fast-diff";
+import { DiffTable } from "./model/DiffTable";
 
-const createContext = (config: DiffConfig) => new DiffContext(config);
-
-const createMarks = (
+const paraDiff = (
   prev: string,
   next: string,
-  delim?: string
-): [IRangeReader, IRangeReader] => {
-  const config: DiffConfig = {
-    lineDelimeter: delim || "\n",
-  };
-  const ctx = createContext(config);
-  const [src, dst] = ctx.build(prev, next);
-  return [src, dst];
+  lineDelimeter: string = "\n"
+): Diff[] => {
+  const diffs: Diff[] = diff(prev, next);
+  return util.toParaDiff(diffs, lineDelimeter);
 };
 
-export default { createMarks };
+const createDiffTable = (
+  prev: string,
+  next: string,
+  lineDelimeter: string = "\n"
+): DiffTable => {
+  const config: DiffConfig = {
+    lineDelimeter,
+  };
+  const table = new DiffTable(config);
+  table.build(prev, next);
+  return table;
+};
+
+export default { /* createMarks, */ paraDiff, createDiffTable };

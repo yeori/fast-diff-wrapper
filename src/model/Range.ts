@@ -1,14 +1,32 @@
-export interface IRangeWriter {
+export type RangeType = -1 | 0 | 1;
+export abstract class Range implements IRange {
+  abstract linenum: number;
+  abstract text: string;
+  abstract type: RangeType;
   offset: number;
-  proceed(step: number): IRangeWriter;
-  addRange(text: string): IRangeWriter;
+  length: number;
+  constructor(offset: number, length: number) {
+    this.offset = offset;
+    this.length = length;
+  }
+
+  get start() {
+    return this.offset;
+  }
+  get end() {
+    return this.offset + this.length;
+  }
+  compare(pos: number) {
+    if (this.start > pos) {
+      return -1;
+    } else if (this.end <= pos) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
 }
-export interface IRangeReader {
-  text: string;
-  ranges: IRange[];
-  textAt(range: IRange): string;
-  getWordRanges(delim?: string): IRange[];
-}
+
 export interface IRange {
   offset: number;
   /**
@@ -24,6 +42,17 @@ export interface IRange {
    */
   end: number;
   /**
+   * line number where it is located
+   */
+  linenum: number;
+  /**
+   * text at [start, end)
+   */
+  text: string;
+  /**
+   */
+  type: RangeType;
+  /**
    * ```
    *          start        end
    * -----------[-----------)--------
@@ -37,8 +66,4 @@ export interface IRange {
    * @param value negative , zero  positive
    */
   compare(value: number): number;
-}
-
-export interface RangeIterator {
-  nextRange(): IRange;
 }
