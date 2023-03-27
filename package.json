@@ -1,11 +1,25 @@
 {
   "name": "fast-diff-wrapper",
+  "description": "Wrapper implementation of fast-diff",
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "main": "dist/index.cjs.js",
-  "module": "dist/index.es.js",
-  "types": "dist/index.d.ts",
+  "author": "yeori <yeori.seo@gmail.com>",
+  "main": "dist/diff-wrapper.cjs.js",
+  "module": "dist/diff-wrapper.es.js",
+  "types": "dist/diff-wrapper.d.ts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yeori/fast-diff-wrapper"
+  },
+  "bugs": {
+    "url": "https://github.com/yeori/fast-diff-wrapper/issues"
+  },
+  "keywords": [
+    "diff",
+    "textdiff"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && dts-bundle-generator --config ./dts-bundle-generator.config.ts",
