@@ -104,7 +104,11 @@ export class DiffTable {
     this.addPair(prev.capture(), next.capture());
     return this;
   }
-  forEach(consumer: (pair: ParaPair) => void) {
+  /**
+   * callback for each (prev, next) line
+   * @param consumer
+   */
+  eachLine(consumer: (pair: ParaPair) => void) {
     this.pairs.forEach((pair) => {
       const prev = this.prevParas[pair.prevIndex];
       const next = this.nextParas[pair.nextIndex];

@@ -33,7 +33,7 @@ It provides additional functionalities
       const prev = "abc\ndef\nhi";
       const next = "AbcDef\nXYZ";
       const table = diff.createDiffTable(prev, next);
-      table.forEach((pair) => {
+      table.eachLine((pair) => {
         const { prev, next } = pair;
         // 1. prev paragraph
         console.log(
