@@ -2,12 +2,12 @@ import diff from "fast-diff";
 import { Diff, EQUAL, DELETE, INSERT } from "fast-diff";
 import util from "../util";
 import { DiffConfig } from "./DiffConfig";
-import ParaSource from "./ParaSource";
+import ParaSource, { IParagraph } from "./ParaSource";
 import { RangeType } from "./Range";
 
 export type ParaPair = {
-  prev: ParaSource | undefined;
-  next: ParaSource | undefined;
+  prev: IParagraph | undefined;
+  next: IParagraph | undefined;
 };
 type LineMap = {
   prevIndex: number;
@@ -41,19 +41,19 @@ class ParaBuilder {
 }
 export class DiffTable {
   private readonly pairs: Array<LineMap> = [];
-  private readonly prevParas: ParaSource[] = [];
-  private readonly nextParas: ParaSource[] = [];
+  private readonly prevParas: IParagraph[] = [];
+  private readonly nextParas: IParagraph[] = [];
   constructor(readonly config: DiffConfig) {}
-  addPair(prev: ParaSource, next: ParaSource) {
+  addPair(prev: IParagraph, next: IParagraph) {
     this.pairs.push({ prevIndex: prev.linenum, nextIndex: next.linenum });
     this.prevParas.push(prev);
     this.nextParas.push(next);
   }
-  private addRight(para: ParaSource, prevIndex: number) {
+  private addRight(para: IParagraph, prevIndex: number) {
     this.pairs.push({ prevIndex, nextIndex: para.linenum });
     this.nextParas.push(para);
   }
-  private addLeft(para: ParaSource, nextIndex: number) {
+  private addLeft(para: IParagraph, nextIndex: number) {
     this.pairs.push({ prevIndex: para.linenum, nextIndex });
     this.prevParas.push(para);
   }
@@ -67,13 +67,11 @@ export class DiffTable {
     return { prev, next };
   }
   build(prevText: string, nextText: string): DiffTable {
-    // const table = this;
     const prev = new ParaBuilder(prevText, this.config, -1);
     const next = new ParaBuilder(nextText, this.config, +1);
 
     const delim = this.config.lineDelimeter;
     const diffs: Diff[] = util.toParaDiff(diff(prevText, nextText), delim);
-    // console.log(diffs);
     diffs.forEach(([type, text]) => {
       if (text === delim) {
         let prevRef, nextRef;
@@ -90,7 +88,6 @@ export class DiffTable {
         } else {
           throw new Error("invalid diff value: " + type);
         }
-        // this.addPair(prevRef!, nextRef!);
       } else {
         if (type === EQUAL) {
           prev.skip(text);
@@ -108,15 +105,7 @@ export class DiffTable {
     return this;
   }
   forEach(consumer: (pair: ParaPair) => void) {
-    // let prevCache: ParaSource | undefined = undefined,
-    //   nextCache: ParaSource | undefined = undefined;
     this.pairs.forEach((pair) => {
-      // let prev: ParaSource | undefined = this.prevParas[pair.prevIndex];
-      // let next: ParaSource | undefined = this.nextParas[pair.nextIndex];
-      // prev = prev === prevCache ? undefined : prev;
-      // next = next === nextCache ? undefined : next;
-      // prevCache = prev;
-      // nextCache = next;
       const prev = this.prevParas[pair.prevIndex];
       const next = this.nextParas[pair.nextIndex];
       consumer({ prev, next });

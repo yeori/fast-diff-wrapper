@@ -1,7 +1,7 @@
 import { assert, expect } from "vitest";
 import { IRange, RangeType } from "../src/model/Range";
 import type { Diff } from "fast-diff";
-import ParaSource from "../src/model/ParaSource";
+import type { IParagraph } from "../src/model/ParaSource";
 import { DiffTable } from "../src/model/DiffTable";
 
 /**
@@ -54,11 +54,11 @@ export const assertRange = (
   }
 };
 
-export const assertEmptyPara = (para: ParaSource) => {
+export const assertEmptyPara = (para: IParagraph) => {
   assert.equal(para.ranges.length, 0);
 };
 export const assertPara = (
-  para: ParaSource,
+  para: IParagraph,
   { line, offset, length }: { line: number; offset: number; length: number }
 ) => {
   expect(para.linenum).toEqual(line);

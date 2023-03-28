@@ -1,10 +1,12 @@
+import util from "../util";
+
 export type RangeType = -1 | 0 | 1;
 export abstract class Range implements IRange {
   abstract linenum: number;
   abstract text: string;
   abstract type: RangeType;
-  offset: number;
-  length: number;
+  readonly offset: number;
+  readonly length: number;
   constructor(offset: number, length: number) {
     this.offset = offset;
     this.length = length;
@@ -17,17 +19,14 @@ export abstract class Range implements IRange {
     return this.offset + this.length;
   }
   compare(pos: number) {
-    if (this.start > pos) {
-      return -1;
-    } else if (this.end <= pos) {
-      return 1;
-    } else {
-      return 0;
-    }
+    return util.compareRange(this.start, this.end, pos);
   }
 }
 
 export interface IRange {
+  /**
+   * relative position from enclosing entity(whole text, or paragraph)
+   */
   offset: number;
   /**
    * relative length from offset
@@ -38,7 +37,7 @@ export interface IRange {
    */
   start: number;
   /**
-   * absolute offset from the text. (offset + length)
+   * absolute offset from enclosing entity(offset + length)
    */
   end: number;
   /**

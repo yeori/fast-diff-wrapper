@@ -37,4 +37,13 @@ const toParaDiff = (
     normalizeDiff(originDiff, lineDelimeter)
   );
 
-export default { normalizeDiff, toParaDiff };
+const compareRange = (start: number, end: number, pos: number) => {
+  if (start > pos) {
+    return pos - start;
+  } else if (end <= pos) {
+    return pos - end;
+  } else {
+    return 0;
+  }
+};
+export default { normalizeDiff, toParaDiff, compareRange };
