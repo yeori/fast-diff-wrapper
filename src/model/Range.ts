@@ -49,6 +49,12 @@ export interface IRange {
    */
   text: string;
   /**
+   *  -1 | 0 | +1
+   * ```
+   * -1) DELETE
+   *  0) UNCHANGED
+   * +1) INSERT
+   * ```
    */
   type: RangeType;
   /**

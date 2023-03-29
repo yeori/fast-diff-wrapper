@@ -30,8 +30,5 @@ describe("fast-diff", () => {
     [  1, '32' ]
     [  0, 'i' ]
     */
-    changes.forEach((c) => {
-      console.log(c);
-    });
   });
 });

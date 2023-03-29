@@ -46,4 +46,13 @@ const compareRange = (start: number, end: number, pos: number) => {
     return 0;
   }
 };
-export default { normalizeDiff, toParaDiff, compareRange };
+
+const toBase36 = (num: number) => num.toString(36).substring(2);
+const uid = {
+  generate: (): string => {
+    return [new Date().getTime(), Math.random(), Math.random()]
+      .map((n) => toBase36(n as number))
+      .join("-");
+  },
+};
+export default { uid, normalizeDiff, toParaDiff, compareRange };
