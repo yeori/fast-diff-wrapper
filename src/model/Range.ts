@@ -1,5 +1,9 @@
 import util from "../util";
-
+/**
+ * -1: DELETE
+ *  0: UNCHANGED
+ * +1: INSERT
+ */
 export type RangeType = -1 | 0 | 1;
 export abstract class Range implements IRange {
   abstract linenum: number;

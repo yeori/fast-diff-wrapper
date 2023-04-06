@@ -1,12 +1,19 @@
 import { PatchListener } from "../event/PatchEvent";
 import type { PatchEvent } from "../event/PatchEvent";
 import util from "../util";
-import { BackwardPatchTable, IPatchTable, TableId } from "./PatchTable";
+import {
+  BackwardPatchTable,
+  ForwardPatchTable,
+  IPatchTable,
+  TableDir,
+  TableId,
+} from "./PatchTable";
 
 const LISTEN_ALL_TABLE = <TableId>"*";
 
 export type PatchTableOption = {
-  uid?: string | number;
+  uid?: string | number | (() => string | number);
+  direction: TableDir;
   baseText?: string;
 };
 
@@ -28,40 +35,58 @@ class EventUtil {
 }
 export interface IPatchContext {
   dispatch(event: PatchEvent): void;
-  createTable(table: IPatchTable): void;
-  deleteTable(table: IPatchTable): void;
+  createTable(table: IPatchTable): IPatchTable;
+  deleteTable(table: IPatchTable): IPatchTable;
 }
+const resolveUid = (idGen: string | number | (() => string | number)) => {
+  if (typeof idGen === "function") {
+    return idGen();
+  } else {
+    return idGen;
+  }
+};
 export class PatchFactory implements IPatchContext {
   private readonly listenerMap: Map<TableId, Set<PatchListener>> = new Map();
   constructor() {}
 
   dispatch(event: PatchEvent): void {
-    EventUtil.notify(this.listenerMap.get(LISTEN_ALL_TABLE), event);
+    try {
+      EventUtil.notify(this.listenerMap.get(LISTEN_ALL_TABLE), event);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  createForwardTable(option?: PatchTableOption): IPatchTable {
+    return this.creatPatchTable(option || { direction: "F" });
+  }
+  createBackwardTable(option?: PatchTableOption): IPatchTable {
+    return this.creatPatchTable(option || { direction: "B" });
   }
   creatPatchTable(option?: PatchTableOption): IPatchTable {
-    const uid = option?.uid || util.uid.generate();
-    const baseText = option?.baseText || "";
-    const table = new BackwardPatchTable(this, <TableId>uid, [], baseText);
+    option = option || { direction: "B" };
+    const idGen = option.uid;
 
-    try {
-      const e: PatchEvent = {
-        type: "table",
-        inserted: true,
-        deleted: false,
-        table,
-        patches: undefined,
-      };
-      this.dispatch(e);
-    } finally {
-    }
+    const uid = idGen ? resolveUid(idGen) : util.uid.generate();
+    const baseText = option.baseText || "";
 
+    const Clazz =
+      option?.direction === "F" ? ForwardPatchTable : BackwardPatchTable;
+    const table = new Clazz(this, <TableId>uid, [], baseText);
+    const e: PatchEvent = {
+      type: "table",
+      inserted: true,
+      deleted: false,
+      table,
+      patches: undefined,
+    };
+    this.dispatch(e);
     return table;
   }
 
-  createTable(option?: PatchTableOption): void {
-    this.creatPatchTable(option);
+  createTable(option?: PatchTableOption): IPatchTable {
+    return this.creatPatchTable(option);
   }
-  deleteTable(table: IPatchTable): void {
+  deleteTable(table: IPatchTable): IPatchTable {
     const e: PatchEvent = {
       type: "table",
       inserted: false,
@@ -70,6 +95,7 @@ export class PatchFactory implements IPatchContext {
       patches: undefined,
     };
     EventUtil.notify(this.listenerMap.get(LISTEN_ALL_TABLE), e);
+    return table;
   }
 
   addPatchListener(listener: PatchListener) {

@@ -1,5 +1,7 @@
 import { IPatch } from "./Patch";
-
+/**
+ * used to traverse changes and retrieve text.
+ */
 export interface ICursor {
   /**
    * text to apply current patch

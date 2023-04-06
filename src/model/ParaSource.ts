@@ -3,13 +3,52 @@ import { DiffConfig } from "./DiffConfig";
 import { IRange, Range, RangeType } from "./Range";
 
 const UNCHANGED = 0;
-
+/**
+ * It represents the paragraphs that make up a single text.
+ */
 export interface IParagraph {
+  /**
+   * line number of paragraph(zero-based). First paragraph has 0
+   */
   linenum: number;
+  /**
+   * offset from entire text.
+   * It takes into account line break characters as well.
+   */
   textOffset: number;
+  /**
+   * paragraph size
+   */
   length: number;
+  /**
+   * text of paragraph
+   */
   paraText: string;
+  /**
+   * insertion or deletion information
+   */
   ranges: IRange[];
+  updated: boolean;
+  /**
+   * returns all ranges including unchanged text.
+   *
+   * When two ranges exist,
+   * ```
+   * ex) "Here is test sentence."
+   *    [-1, offset: 5, len:2] // "is"
+   *    [-1, offset:13, len:3] // "sen"
+   * ```
+   * it will include unchanged ranges
+   *
+   * ```
+   * [ 0, offset: 0, len: 5] // "Here "
+   * [-1, offset: 5, len: 2] // "is"
+   * [ 0, offset: 7, len: 6] // " test "
+   * [-1, offset:13, len: 3] // "sen"
+   * [ 0, offset:16, len: 6] // " tense."
+   * ```
+   * @returns
+   */
   splitPara(): IRange[];
 }
 class RangeInPara extends Range {
@@ -34,6 +73,7 @@ export default class ParaSource implements IParagraph, IRange {
   private lineNumber = 0;
   private offsetInPara: number = 0;
   private globalOffset: number = 0;
+  private readonly neighbors: number[];
   constructor(
     readonly originText: string,
     readonly config: DiffConfig,
@@ -45,6 +85,7 @@ export default class ParaSource implements IParagraph, IRange {
     this.originText = originText;
     this.lineNumber = lineNumber;
     this.globalOffset = globalOffset;
+    this.neighbors = [];
   }
   get linenum() {
     return this.lineNumber;
@@ -73,6 +114,12 @@ export default class ParaSource implements IParagraph, IRange {
   }
   get text() {
     return this.paraText;
+  }
+  get updated() {
+    return this.ranges.length > 0 || this.neighbors.length > 0;
+  }
+  addNeighbor(lineNumber: number) {
+    this.neighbors.push(lineNumber);
   }
   compare(value: number): number {
     return util.compareRange(this.start, this.end, value);
@@ -104,26 +151,6 @@ export default class ParaSource implements IParagraph, IRange {
       this.globalOffset + this.offsetInPara
     );
   }
-  /**
-   * returns all ranges including unchanged text.
-   *
-   * When two ranges exist,
-   * ```
-   * ex) "Here is test sentence."
-   *    [-1, offset: 5, len:2] // "is"
-   *    [-1, offset:13, len:3] // "sen"
-   * ```
-   * it will include unchanged ranges
-   *
-   * ```
-   * [ 0, offset: 0, len: 5] // "Here "
-   * [-1, offset: 5, len: 2] // "is"
-   * [ 0, offset: 7, len: 6] // " test "
-   * [-1, offset:13, len: 3] // "sen"
-   * [ 0, offset:16, len: 6] // " tense."
-   * ```
-   * @returns
-   */
   splitPara(): IRange[] {
     if (this.ranges.length === 0) {
       return [new RangeInPara(0, this.offsetInPara, this, UNCHANGED)];

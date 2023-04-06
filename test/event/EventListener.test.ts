@@ -16,7 +16,7 @@ describe("event listeners", () => {
     // const tableDeletion = vi.spyOn(listener);
     const fac = PatchFactory.loadFactory();
     fac.addPatchListener(tableCrudListener);
-    fac.creatPatchTable({ uid: TABLE_ID });
+    fac.creatPatchTable({ uid: TABLE_ID, direction: "B" });
     const table = fac.creatPatchTable();
 
     table.delete();

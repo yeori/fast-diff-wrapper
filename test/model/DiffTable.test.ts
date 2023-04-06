@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest";
 import type { DiffConfig } from "../../src/model/DiffConfig";
 import { DiffTable } from "../../src/model/DiffTable";
-import helper, {
+import {
   assertEmptyPara,
   assertLineMap,
   assertRange,

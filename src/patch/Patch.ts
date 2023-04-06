@@ -4,8 +4,15 @@ import { UTCMillis } from "./schema";
 
 export type PatchId = string | undefined;
 export type PatchDiff = string | number;
-
+/**
+ * unit of changes.
+ */
 export interface IPatch {
+  /**
+   * apply changes to the given text and return changed one.
+   * @param text text to apply changes
+   * @param reverse
+   */
   run(text: string, reverse: boolean): string;
   readonly tableRef: TableId | undefined;
   readonly creationTime: UTCMillis;
