@@ -1,5 +1,7 @@
 # Fast-diff-wrapper
 
+[![yeori](https://circleci.com/gh/yeori/fast-diff-wrapper.svg?style=shield)](https://www.npmjs.com/package/fast-diff-wrapper)
+
 This is an wrapper implementation of `fast-diff`([https://github.com/jhchen/fast-diff](https://github.com/jhchen/fast-diff)).
 
 It provides additional functionalities
