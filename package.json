@@ -2,7 +2,7 @@
   "name": "fast-diff-wrapper",
   "description": "Wrapper implementation of fast-diff",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.1-beta.0",
   "type": "module",
   "author": "yeori <yeori.seo@gmail.com>",
   "main": "dist/diff-wrapper.cjs.js",
