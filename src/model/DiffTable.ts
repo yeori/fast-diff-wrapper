@@ -142,7 +142,7 @@ export class DiffTable {
     return this;
   }
   getPairs(option: { skipSamePara: boolean }) {
-    console.log(option);
+    option = option;
     let line = { L: -1, R: -1 } as {
       L: number | undefined;
       lastL: number | undefined;
@@ -152,7 +152,7 @@ export class DiffTable {
     };
 
     let pairs: ParaPair[] = [];
-    if (this.pairs.length > 1) {
+    if (this.pairs.length > 0) {
       line.L = line.lastL = this.pairs[0].prevIndex;
       line.R = line.lastR = this.pairs[0].nextIndex;
     }

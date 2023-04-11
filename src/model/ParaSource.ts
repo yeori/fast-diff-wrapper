@@ -116,7 +116,7 @@ export default class ParaSource implements IParagraph, IRange {
     return this.paraText;
   }
   get updated() {
-    return this.ranges.length > 0 || this.neighbors.length > 0;
+    return this.ranges.length > 0 || this.neighbors.length > 1;
   }
   addNeighbor(lineNumber: number) {
     this.neighbors.push(lineNumber);
