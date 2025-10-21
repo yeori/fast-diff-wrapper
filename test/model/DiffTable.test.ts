@@ -90,8 +90,8 @@ describe("ParaSource offset length", () => {
     ]);
     {
       let { prev, next } = table.at(0);
-      assertPara(prev!, { line: 0, offset: 0, length: 4 }); // abyz
-      assertPara(next!, { line: 0, offset: 0, length: 2 }); // aB
+      assertPara(prev, { line: 0, offset: 0, length: 4 }); // abyz
+      assertPara(next, { line: 0, offset: 0, length: 2 }); // aB
       // range
       assertRange(prev.ranges[0], { offset: 1, length: 2 }); // a[by]
       assertRange(next.ranges[0], { offset: 1, length: 1 }); // a[B]
@@ -163,5 +163,12 @@ describe("ParaSource offset length", () => {
     //   assertPara(next, { line: 2, offset: 7, length: 4 }); // FGHz
     //   assertRange(next.ranges[0], { offset: 0, length: 3 }); // [FGH]z
     // }
+  });
+  test("case single line", () => {
+    const table = new DiffTable(config).build("abc", "abcD");
+    table.eachLine(({ prev, next }) => {
+      console.log(prev!.splitPara().map((para) => para.text));
+      console.log(next!.splitPara().map((para) => para.text));
+    });
   });
 });

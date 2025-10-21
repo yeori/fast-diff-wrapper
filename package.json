@@ -1,8 +1,8 @@
 {
   "name": "fast-diff-wrapper",
   "description": "Wrapper implementation of fast-diff",
-  "private": true,
-  "version": "0.0.1-beta.1",
+  "private": false,
+  "version": "0.0.3-beta.0",
   "type": "module",
   "author": "yeori <yeori.seo@gmail.com>",
   "main": "dist/diff-wrapper.cjs.js",
@@ -28,12 +28,13 @@
     "report": "vitest run --coverage --reporter=verbose"
   },
   "devDependencies": {
+    "@types/fast-diff": "^1.1.0",
     "@types/node": "^18.15.5",
     "@vitest/coverage-c8": "^0.29.7",
     "dts-bundle-generator": "^7.2.0",
     "typescript": "^4.9.3",
     "vite": "^4.2.0",
-    "vitest": "^0.29.7"
+    "vitest": "^3.2.4"
   },
   "dependencies": {
     "fast-diff": "^1.2.0"

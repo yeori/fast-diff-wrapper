@@ -1,86 +1,93 @@
-# Fast-diff-wrapper
+# fast-diff-wrapper
 
-[![yeori](https://circleci.com/gh/yeori/fast-diff-wrapper.svg?style=shield)](https://www.npmjs.com/package/fast-diff-wrapper)
+[![NPM version](https://img.shields.io/npm/v/fast-diff-wrapper.svg)](https://www.npmjs.com/package/fast-diff-wrapper)
+[![CircleCI](https://circleci.com/gh/yeori/fast-diff-wrapper.svg?style=svg)](https://circleci.com/gh/yeori/fast-diff-wrapper)
 
-This is an wrapper implementation of `fast-diff`([https://github.com/jhchen/fast-diff](https://github.com/jhchen/fast-diff)).
+This library is a wrapper around `fast-diff`, providing higher-level abstractions for comparing text and managing changes. It allows you to analyze differences between two texts on a line-by-line or paragraph-by-paragraph basis and provides tools to manage these changes as a sequence of patches.
 
-It provides additional functionalities
+## Features
 
-1. Range information - provides range(start, end) information where texts are deleted in the paragraph.
+- **Text Diffing**: Compares two strings and provides a structured view of the differences.
+- **Paragraph-level Analysis**: Processes diffs based on paragraphs or lines, making it easier to work with structured text.
+- **Patch Management**: Represents changes as patches, which can be stored and applied.
+- **History Traversal**: Provides a cursor to navigate through a history of patches, enabling undo/redo functionality.
+- **Event-driven**: Emits events when patches or patch tables are created or modified.
 
-# Sample
+## Installation
 
-## 1. html page
-
-```html
-<html>
-  <head>
-    ...
-    <script type="text/javascript" src="/fiast-diff-wrapper.umd.js"></script>
-  </head>
-  <body>
-    ...
-  </body>
-  <script>
-    const cmd = ["-", " ", "+"]; // [delete, unchanged, insert]
-    window.onload = () => {
-      const diff = window["fast-diff-wrapper"];
-      /**
-       * PREV     NEXT
-       * 0 ab    0 ABcd
-       * 1 cd    1 efGH
-       * 2 ef    2 XYZ!
-       *
-       */
-      const prev = "abc\ndef\nhi";
-      const next = "AbcDef\nXYZ";
-      const table = diff.createDiffTable(prev, next);
-      table.eachLine((pair) => {
-        const { prev, next } = pair;
-        // 1. prev paragraph
-        console.log(
-          `PREV "${prev.paraText}" at [${prev.textOffset}, ${prev.length})`
-        );
-        // 2. ranges in a prev paragraph
-        prev.ranges.forEach((range) => {
-          const { type, start, end, text, linenum } = range;
-          console.log(
-            `[${
-              cmd[type + 1]
-            }] [${start}, ${end}) "${text}" at LINE: ${linenum}`
-          );
-        });
-        // 3. next paragraph
-        console.log(
-          `NEXT "${next.paraText}" at [${next.textOffset}, ${next.length})`
-        );
-        // 2. ranges in a next paragraph
-        next.ranges.forEach((range) => {
-          const { type, start, end, text, linenum } = range;
-          console.log(
-            `[${
-              cmd[type + 1]
-            }] [${start}, ${end}) "${text}" at LINE: ${linenum}`
-          );
-        });
-      });
-    };
-  </script>
-</html>
+```bash
+npm install fast-diff-wrapper
 ```
 
+## Usage
+
+### 1. Comparing Two Texts
+
+The `createDiffTable` function is the primary way to compare two texts. It returns a `DiffTable` that contains the line-by-line differences.
+
+```typescript
+import { createDiffTable } from 'fast-diff-wrapper';
+
+const prevText = "Hello world
+This is the original text.";
+const nextText = "Hello there
+This is the updated text.";
+
+const table = createDiffTable(prevText, nextText);
+
+table.eachLine(({ prev, next }) => {
+  if (prev && prev.updated) {
+    console.log(`Line ${prev.linenum} was changed:`);
+    console.log(`- ${prev.paraText}`);
+    prev.ranges.forEach(range => {
+      console.log(`  - Deleted: "${range.text}"`);
+    });
+  }
+  if (next && next.updated) {
+    console.log(`+ ${next.paraText}`);
+    next.ranges.forEach(range => {
+      console.log(`  + Inserted: "${range.text}"`);
+    });
+  }
+});
 ```
-PREV "ab" at [0, 2)
-  [-] [0, 2) "ab" at LINE: 0
-NEXT "ABcd" at [0, 4)
-  [+] [0, 2) "AB" at LINE: 0
-PREV "cd" at [3, 2)
-NEXT "ABcd" at [0, 4)
-  [+] [0, 2) "AB" at LINE: 0
-PREV "ef" at [6, 2)
-NEXT "efGH" at [5, 4)
-  [+] [2, 4) "GH" at LINE: 1
-PREV "ef" at [6, 2)
-NEXT "XYZ!" at [10, 4)
-  [+] [0, 4) "XYZ!" at LINE: 2
-```
+
+## API Reference
+
+### Core Functions
+
+- `createDiffTable(prev: string, next: string, lineDelimeter: string = '
+'): DiffTable` \* Creates a table that represents the differences between two texts.
+
+### Main Classes
+
+- **`DiffTable`**: Represents the comparison between two texts.
+
+  - `.build(prevText: string, nextText: string)`: Constructs the diff table.
+  - `.eachLine(consumer: (pair: ParaPair) => void)`: Iterates over each line/paragraph pair.
+  - `.getPairs(option: { skipSamePara: boolean })`: Returns an array of paragraph pairs.
+
+- **`IParagraph`**: Represents a line or paragraph in the text.
+
+  - `.linenum`: The line number.
+  - `.paraText`: The text content of the paragraph.
+  - `.ranges`: An array of `IRange` objects indicating insertions or deletions within the paragraph.
+  - `.updated`: A boolean indicating if the paragraph has changes.
+
+- **`PatchFactory`**: The entry point for creating and managing patch tables.
+
+  - `.createForwardTable(option?: PatchTableOption): IPatchTable`
+  - `.createBackwardTable(option?: PatchTableOption): IPatchTable`
+  - `.addPatchListener(listener: PatchListener)`
+
+- **`IPatchTable`**: A container for a sequence of patches.
+
+  - `.createPatch(text: string): IPatch`: Creates a new patch by comparing the given text with the latest text in the table.
+  - `.getCursor(): ICursor`: Returns a cursor to navigate the patch history.
+
+- **`ICursor`**: A navigator for traversing patch history.
+  - `.currentText`: The text at the current cursor position.
+  - `.next(): string`: Applies the next patch and returns the new text.
+  - `.prev(): string`: Reverts the previous patch and returns the prior text.
+  - `.hasNext(): boolean`
+  - `.hasPrev(): boolean`

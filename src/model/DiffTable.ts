@@ -219,8 +219,10 @@ export class DiffTable {
    */
   eachLine(consumer: (pair: ParaPair) => void) {
     this.pairs.forEach((pair) => {
-      const prev = this.prevParas[pair.prevIndex || -1];
-      const next = this.nextParas[pair.nextIndex || -1];
+      const prev =
+        this.prevParas[pair.prevIndex === undefined ? -1 : pair.prevIndex];
+      const next =
+        this.nextParas[pair.nextIndex === undefined ? -1 : pair.nextIndex];
       consumer({ prev, next });
     });
   }
